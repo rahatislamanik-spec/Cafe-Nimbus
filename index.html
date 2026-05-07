@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Café Nimbus — AWS Cloud Infrastructure | Md Rahat Islam Anik</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --espresso: #12100E;
+    --roast: #1E1A16;
+    --bark: #2C251F;
+    --amber: #E8930A;
+    --amber-light: #F5B040;
+    --amber-dim: rgba(232,147,10,0.12);
+    --cream: #F5F0E8;
+    --cream-dim: rgba(245,240,232,0.65);
+    --cream-ghost: rgba(245,240,232,0.08);
+    --aws-orange: #FF9900;
+    --aws-dim: rgba(255,153,0,0.12);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--espresso);
+    color: var(--cream);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* GRAIN */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.5;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 1.2rem 3rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    backdrop-filter: blur(16px);
+    background: rgba(18,16,14,0.88);
+    border-bottom: 1px solid rgba(232,147,10,0.12);
+  }
+
+  .nav-logo {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.2rem;
+    color: var(--amber);
+    text-decoration: none;
+    letter-spacing: 0.05em;
+  }
+
+  .nav-links { display: flex; gap: 2rem; list-style: none; }
+  .nav-links a {
+    color: var(--cream-dim);
+    text-decoration: none;
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transition: color 0.3s;
+  }
+  .nav-links a:hover { color: var(--amber); }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding: 8rem 3rem 5rem;
+    position: relative;
+    z-index: 1;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .hero-inner { max-width: 820px; }
+
+  .hero-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 2.5rem;
+    opacity: 0;
+    animation: fadeUp 0.9s ease forwards;
+  }
+
+  .hero-tag-line { width: 2.5rem; height: 1px; background: var(--amber); }
+  .hero-tag span {
+    font-size: 0.72rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--amber);
+    font-weight: 500;
+  }
+
+  h1.hero-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(4rem, 8vw, 7.5rem);
+    line-height: 0.95;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    opacity: 0;
+    animation: fadeUp 0.9s ease 0.12s forwards;
+  }
+
+  .hero-title-sub {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1.5rem, 3vw, 2.5rem);
+    color: var(--amber);
+    font-style: italic;
+    font-weight: 400;
+    margin-bottom: 2.5rem;
+    opacity: 0;
+    animation: fadeUp 0.9s ease 0.24s forwards;
+  }
+
+  .hero-lead {
+    font-size: clamp(1rem, 1.8vw, 1.2rem);
+    color: var(--cream-dim);
+    max-width: 620px;
+    line-height: 1.85;
+    margin-bottom: 3.5rem;
+    opacity: 0;
+    animation: fadeUp 0.9s ease 0.36s forwards;
+    font-style: italic;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.3rem;
+  }
+
+  .hero-phases {
+    display: flex;
+    gap: 0;
+    opacity: 0;
+    animation: fadeUp 0.9s ease 0.48s forwards;
+  }
+
+  .phase-dot {
+    flex: 1;
+    padding: 1.25rem 1.5rem;
+    border: 1px solid var(--cream-ghost);
+    border-right: none;
+    position: relative;
+    cursor: default;
+    transition: background 0.3s;
+  }
+  .phase-dot:last-child { border-right: 1px solid var(--cream-ghost); }
+  .phase-dot:hover { background: var(--amber-dim); }
+
+  .phase-dot-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--amber);
+    letter-spacing: 0.1em;
+    margin-bottom: 0.3rem;
+  }
+
+  .phase-dot-name {
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--cream);
+  }
+
+  /* SECTIONS */
+  section {
+    position: relative;
+    z-index: 1;
+    padding: 6rem 3rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .band {
+    background: var(--roast);
+    border-top: 1px solid var(--cream-ghost);
+    border-bottom: 1px solid var(--cream-ghost);
+    padding: 5rem 0;
+  }
+
+  .label {
+    font-size: 0.7rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--amber);
+    font-weight: 500;
+    margin-bottom: 1rem;
+    font-family: 'DM Mono', monospace;
+  }
+
+  h2.section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2.2rem, 4.5vw, 3.5rem);
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 1.5rem;
+  }
+
+  h2.section-title em { font-style: italic; color: var(--amber); }
+
+  .section-body {
+    color: var(--cream-dim);
+    max-width: 680px;
+    font-size: 1.05rem;
+    line-height: 1.85;
+  }
+
+  .divider {
+    width: 3rem;
+    height: 2px;
+    background: var(--amber);
+    margin: 1.5rem 0 2.5rem;
+  }
+
+  /* ARCHITECTURE DIAGRAM */
+  .arch-wrap {
+    margin: 3rem 0;
+    padding: 2.5rem;
+    background: var(--bark);
+    border: 1px solid rgba(232,147,10,0.2);
+    overflow-x: auto;
+  }
+
+  .arch-svg { width: 100%; max-width: 960px; display: block; margin: 0 auto; }
+
+  /* PHASE CARDS */
+  .phase-block {
+    margin-bottom: 5rem;
+    padding-bottom: 5rem;
+    border-bottom: 1px solid var(--cream-ghost);
+  }
+  .phase-block:last-child { border-bottom: none; margin-bottom: 0; }
+
+  .phase-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 2rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .phase-number {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 5rem;
+    font-weight: 700;
+    color: rgba(232,147,10,0.15);
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .phase-header-text { flex: 1; }
+
+  .phase-badge {
+    display: inline-block;
+    padding: 0.3rem 0.9rem;
+    background: var(--amber);
+    color: var(--espresso);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+    font-family: 'DM Mono', monospace;
+  }
+
+  h3.phase-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 0.5rem;
+  }
+
+  h3.phase-title em { color: var(--amber); font-style: italic; }
+
+  .phase-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-top: 2rem;
+  }
+
+  .phase-card {
+    padding: 1.75rem;
+    border: 1px solid var(--cream-ghost);
+    border-left: 2px solid var(--amber);
+  }
+
+  .phase-card h4 {
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--amber);
+    font-family: 'DM Mono', monospace;
+    margin-bottom: 0.75rem;
+  }
+
+  .phase-card p, .phase-card li {
+    color: var(--cream-dim);
+    font-size: 0.92rem;
+    line-height: 1.7;
+  }
+
+  .phase-card ul { list-style: none; }
+  .phase-card ul li { padding: 0.3rem 0; border-bottom: 1px solid var(--cream-ghost); }
+  .phase-card ul li:last-child { border-bottom: none; }
+  .phase-card ul li::before { content: '✓ '; color: var(--amber); font-family: 'DM Mono', monospace; }
+
+  .insight-block {
+    margin-top: 2rem;
+    padding: 1.5rem 2rem;
+    background: var(--amber-dim);
+    border-left: 3px solid var(--amber);
+  }
+
+  .insight-block p {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.15rem;
+    font-style: italic;
+    color: var(--cream);
+    line-height: 1.65;
+  }
+
+  .insight-block strong { color: var(--amber); font-style: normal; }
+
+  /* PHASE SVG DIAGRAM */
+  .phase-diagram {
+    margin: 2rem 0;
+    padding: 2rem;
+    background: var(--bark);
+    border: 1px solid rgba(232,147,10,0.15);
+  }
+
+  /* DECISION TABLE */
+  .decision-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 2.5rem;
+    font-size: 0.88rem;
+  }
+
+  .decision-table th {
+    text-align: left;
+    padding: 0.85rem 1.25rem;
+    background: var(--bark);
+    color: var(--amber);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    border-bottom: 1px solid rgba(232,147,10,0.2);
+  }
+
+  .decision-table td {
+    padding: 0.85rem 1.25rem;
+    border-bottom: 1px solid var(--cream-ghost);
+    color: var(--cream-dim);
+    vertical-align: top;
+    line-height: 1.55;
+  }
+
+  .decision-table tr:hover td { background: var(--cream-ghost); }
+
+  .decision-table td:first-child {
+    color: var(--cream);
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .chosen { color: #6FCF97 !important; }
+  .rejected { color: #EB5757 !important; text-decoration: line-through; opacity: 0.7; }
+
+  /* TECH STACK */
+  .tech-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1px;
+    background: var(--cream-ghost);
+    border: 1px solid var(--cream-ghost);
+    margin-top: 2.5rem;
+  }
+
+  .tech-item {
+    background: var(--espresso);
+    padding: 1.5rem;
+    transition: background 0.3s;
+  }
+
+  .tech-item:hover { background: var(--bark); }
+
+  .tech-service {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.82rem;
+    color: var(--amber);
+    font-weight: 500;
+    margin-bottom: 0.4rem;
+  }
+
+  .tech-role {
+    font-size: 0.82rem;
+    color: var(--cream-dim);
+    line-height: 1.5;
+  }
+
+  /* RESULT */
+  .result-list {
+    list-style: none;
+    margin-top: 2.5rem;
+  }
+
+  .result-list li {
+    display: flex;
+    gap: 1.25rem;
+    padding: 1.25rem 0;
+    border-bottom: 1px solid var(--cream-ghost);
+    align-items: flex-start;
+  }
+
+  .result-list li:last-child { border-bottom: none; }
+
+  .result-check {
+    width: 1.5rem;
+    height: 1.5rem;
+    border: 1px solid var(--amber);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 0.7rem;
+    color: var(--amber);
+    margin-top: 0.1rem;
+  }
+
+  .result-text {
+    color: var(--cream-dim);
+    font-size: 1rem;
+    line-height: 1.65;
+  }
+
+  .result-text strong { color: var(--cream); font-weight: 500; }
+
+  /* FUTURE */
+  .future-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-top: 2.5rem;
+  }
+
+  .future-card {
+    padding: 1.5rem;
+    border: 1px solid var(--cream-ghost);
+    transition: border-color 0.3s;
+  }
+
+  .future-card:hover { border-color: rgba(232,147,10,0.35); }
+
+  .future-card h4 {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--amber);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 0.65rem;
+  }
+
+  .future-card p { color: var(--cream-dim); font-size: 0.9rem; line-height: 1.65; }
+
+  /* FOOTER */
+  footer {
+    position: relative;
+    z-index: 1;
+    border-top: 1px solid var(--cream-ghost);
+    padding: 4rem 3rem;
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+  }
+
+  .footer-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+  }
+
+  .footer-bio {
+    color: var(--cream-dim);
+    font-size: 0.92rem;
+    line-height: 1.7;
+    margin-bottom: 2rem;
+  }
+
+  .btn-row { display: flex; gap: 1rem; flex-wrap: wrap; }
+
+  .btn-a {
+    padding: 0.8rem 1.8rem;
+    background: var(--amber);
+    color: var(--espresso);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.82rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition: all 0.3s;
+    display: inline-block;
+  }
+
+  .btn-a:hover { background: var(--amber-light); }
+
+  .btn-b {
+    padding: 0.8rem 1.8rem;
+    border: 1px solid rgba(232,147,10,0.4);
+    color: var(--amber);
+    text-decoration: none;
+    font-size: 0.82rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition: all 0.3s;
+    display: inline-block;
+  }
+
+  .btn-b:hover { border-color: var(--amber); background: var(--amber-dim); }
+
+  .other-projects { display: flex; flex-direction: column; gap: 1rem; }
+
+  .proj-link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+    border: 1px solid var(--cream-ghost);
+    text-decoration: none;
+    color: var(--cream);
+    transition: all 0.3s;
+  }
+
+  .proj-link:hover {
+    border-color: rgba(232,147,10,0.35);
+    transform: translateX(4px);
+  }
+
+  .proj-link-name { font-weight: 500; margin-bottom: 0.2rem; }
+  .proj-link-meta { font-size: 0.78rem; color: var(--cream-dim); }
+  .proj-link-arrow { color: var(--amber); }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .fi { opacity: 0; transform: translateY(18px); transition: opacity 0.65s ease, transform 0.65s ease; }
+  .fi.vis { opacity: 1; transform: translateY(0); }
+
+  @media (max-width: 768px) {
+    nav { padding: 1rem 1.5rem; }
+    .nav-links { display: none; }
+    section { padding: 4rem 1.5rem; }
+    .hero { padding: 7rem 1.5rem 3rem; }
+    .hero-phases { flex-direction: column; }
+    .phase-dot { border-right: 1px solid var(--cream-ghost); border-bottom: none; }
+    .phase-grid { grid-template-columns: 1fr; }
+    .phase-header { flex-direction: column; gap: 1rem; }
+    .future-grid { grid-template-columns: 1fr; }
+    footer { grid-template-columns: 1fr; padding: 3rem 1.5rem; }
+    .decision-table { font-size: 0.78rem; }
+    .decision-table th, .decision-table td { padding: 0.6rem 0.75rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="#">☁️ Café Nimbus</a>
+  <ul class="nav-links">
+    <li><a href="#phases">The Phases</a></li>
+    <li><a href="#decisions">Decisions</a></li>
+    <li><a href="#stack">Stack</a></li>
+    <li><a href="#result">Result</a></li>
+    <li><a href="#contact">Connect</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<div style="position:relative;z-index:1;">
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-tag">
+      <div class="hero-tag-line"></div>
+      <span>AWS Cloud Infrastructure · Five-Phase Architecture · Self-Directed Case Study</span>
+    </div>
+    <h1 class="hero-title">Café<br>Nimbus</h1>
+    <p class="hero-title-sub">From one broken server to a self-operating cloud.</p>
+    <p class="hero-lead">"Café Nimbus came to me with one broken server and no plan for growth. I left them with an infrastructure that scales automatically, recovers from failures without human intervention, and reports on itself every morning — without anyone touching a keyboard."</p>
+
+    <div class="hero-phases">
+      <div class="phase-dot">
+        <div class="phase-dot-num">01</div>
+        <div class="phase-dot-name">Get Online</div>
+      </div>
+      <div class="phase-dot">
+        <div class="phase-dot-num">02</div>
+        <div class="phase-dot-name">Get Dynamic</div>
+      </div>
+      <div class="phase-dot">
+        <div class="phase-dot-num">03</div>
+        <div class="phase-dot-name">Get Secure</div>
+      </div>
+      <div class="phase-dot">
+        <div class="phase-dot-num">04</div>
+        <div class="phase-dot-name">Get Scalable</div>
+      </div>
+      <div class="phase-dot">
+        <div class="phase-dot-num">05</div>
+        <div class="phase-dot-name">Get Autonomous</div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- THE ENGAGEMENT -->
+<div class="band">
+  <section>
+    <p class="label">The Engagement</p>
+    <h2 class="section-title fi">A café brand.<br>One server. <em>No plan.</em></h2>
+    <div class="divider"></div>
+    <p class="section-body fi">Café Nimbus is a growing café brand preparing for national expansion. When I came on board, their entire online presence ran on a single EC2 instance — no redundancy, no backups, no plan for what happens when traffic spikes during a promotion. One bad day and the whole operation goes dark.</p>
+    <br>
+    <p class="section-body fi">My mandate: build an AWS infrastructure that could grow with the business, survive failures automatically, and operate with as little manual intervention as possible. What followed was a five-phase architectural engagement. Each phase solved a specific business problem. Each phase made the next one possible.</p>
+  </section>
+</div>
+
+<!-- ARCHITECTURE OVERVIEW -->
+<section>
+  <p class="label">Architecture Overview</p>
+  <h2 class="section-title fi">The full <em>AWS stack</em></h2>
+  <div class="arch-wrap fi">
+    <svg class="arch-svg" viewBox="0 0 960 440" xmlns="http://www.w3.org/2000/svg" font-family="DM Sans, sans-serif">
+      <rect width="960" height="440" fill="#2C251F"/>
+
+      <!-- AWS Cloud boundary -->
+      <rect x="20" y="20" width="920" height="400" rx="4" fill="none" stroke="rgba(232,147,10,0.2)" stroke-width="1" stroke-dasharray="6,3"/>
+      <text x="40" y="45" fill="#E8930A" font-size="11" letter-spacing="2" font-weight="600" font-family="DM Mono, monospace">AWS CLOUD — CAFÉ NIMBUS</text>
+
+      <!-- Internet -->
+      <rect x="40" y="60" width="100" height="40" rx="2" fill="#12100E" stroke="#E8930A" stroke-width="1"/>
+      <text x="90" y="85" fill="#F5F0E8" font-size="10" text-anchor="middle" font-weight="500">🌐 Internet</text>
+
+      <!-- Arrow to ALB -->
+      <line x1="140" y1="80" x2="195" y2="80" stroke="#E8930A" stroke-width="1.5" marker-end="url(#arr)"/>
+
+      <!-- ALB -->
+      <rect x="195" y="60" width="130" height="40" rx="2" fill="#1E1A16" stroke="#FF9900" stroke-width="1.5"/>
+      <text x="260" y="78" fill="#F5F0E8" font-size="10" text-anchor="middle" font-weight="500">Application Load</text>
+      <text x="260" y="92" fill="#FF9900" font-size="9" text-anchor="middle">Balancer · 2 AZs</text>
+
+      <!-- Arrow to ASG -->
+      <line x1="325" y1="80" x2="380" y2="80" stroke="#E8930A" stroke-width="1.5" marker-end="url(#arr)"/>
+
+      <!-- ASG -->
+      <rect x="380" y="50" width="200" height="60" rx="2" fill="#1E1A16" stroke="#FF9900" stroke-width="1.5"/>
+      <text x="480" y="72" fill="#F5F0E8" font-size="10" text-anchor="middle" font-weight="500">Auto Scaling Group</text>
+      <text x="430" y="90" fill="#FF9900" font-size="9" text-anchor="middle">EC2</text>
+      <text x="480" y="90" fill="#FF9900" font-size="9" text-anchor="middle">EC2</text>
+      <text x="530" y="90" fill="#FF9900" font-size="9" text-anchor="middle">EC2</text>
+      <line x1="455" y1="84" x2="455" y2="84" stroke="rgba(245,240,232,0.2)" stroke-width="1"/>
+      <line x1="505" y1="84" x2="505" y2="84" stroke="rgba(245,240,232,0.2)" stroke-width="1"/>
+
+      <!-- VPC Box -->
+      <rect x="155" y="130" width="560" height="200" rx="2" fill="none" stroke="rgba(232,147,10,0.25)" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="170" y="150" fill="#E8930A" font-size="9" letter-spacing="1.5" font-family="DM Mono, monospace">CUSTOM VPC  /16</text>
+
+      <!-- Public Subnet -->
+      <rect x="170" y="160" width="160" height="150" rx="2" fill="rgba(232,147,10,0.05)" stroke="rgba(232,147,10,0.2)" stroke-width="1"/>
+      <text x="250" y="178" fill="#E8930A" font-size="8.5" text-anchor="middle" letter-spacing="1" font-family="DM Mono, monospace">PUBLIC SUBNET</text>
+      <rect x="188" y="188" width="124" height="34" rx="2" fill="#12100E" stroke="rgba(245,240,232,0.2)" stroke-width="1"/>
+      <text x="250" y="208" fill="#F5F0E8" font-size="9.5" text-anchor="middle">🛡️ Bastion Host</text>
+      <rect x="188" y="230" width="124" height="34" rx="2" fill="#12100E" stroke="rgba(245,240,232,0.2)" stroke-width="1"/>
+      <text x="250" y="250" fill="#F5F0E8" font-size="9.5" text-anchor="middle">🔀 NAT Gateway</text>
+      <rect x="188" y="272" width="124" height="28" rx="2" fill="#12100E" stroke="rgba(245,240,232,0.2)" stroke-width="1"/>
+      <text x="250" y="290" fill="#F5F0E8" font-size="9" text-anchor="middle">Internet Gateway</text>
+
+      <!-- Private Subnet -->
+      <rect x="355" y="160" width="340" height="150" rx="2" fill="rgba(232,147,10,0.03)" stroke="rgba(232,147,10,0.15)" stroke-width="1"/>
+      <text x="525" y="178" fill="#E8930A" font-size="8.5" text-anchor="middle" letter-spacing="1" font-family="DM Mono, monospace">PRIVATE SUBNET  —  NO PUBLIC IPs</text>
+      <rect x="370" y="188" width="140" height="34" rx="2" fill="#12100E" stroke="rgba(245,240,232,0.2)" stroke-width="1"/>
+      <text x="440" y="208" fill="#F5F0E8" font-size="9.5" text-anchor="middle">💻 EC2 + LAMP</text>
+      <rect x="525" y="188" width="155" height="34" rx="2" fill="#12100E" stroke="rgba(245,240,232,0.2)" stroke-width="1"/>
+      <text x="602" y="208" fill="#F5F0E8" font-size="9.5" text-anchor="middle">🗄️ RDS (MySQL)</text>
+      <rect x="370" y="238" width="140" height="34" rx="2" fill="#12100E" stroke="rgba(245,240,232,0.2)" stroke-width="1"/>
+      <text x="440" y="258" fill="#F5F0E8" font-size="9.5" text-anchor="middle">AMI Golden Image</text>
+      <rect x="525" y="238" width="155" height="34" rx="2" fill="#12100E" stroke="rgba(245,240,232,0.2)" stroke-width="1"/>
+      <text x="602" y="258" fill="#F5F0E8" font-size="9.5" text-anchor="middle">Network ACLs</text>
+      <rect x="370" y="285" width="310" height="20" rx="2" fill="#12100E" stroke="rgba(245,240,232,0.15)" stroke-width="1"/>
+      <text x="525" y="299" fill="rgba(245,240,232,0.5)" font-size="8.5" text-anchor="middle">Security Groups (stateful) + NACLs (stateless)</text>
+
+      <!-- S3 -->
+      <rect x="40" y="165" width="100" height="50" rx="2" fill="#1E1A16" stroke="#FF9900" stroke-width="1"/>
+      <text x="90" y="186" fill="#FF9900" font-size="10" text-anchor="middle" font-weight="500">Amazon S3</text>
+      <text x="90" y="200" fill="rgba(245,240,232,0.5)" font-size="8.5" text-anchor="middle">Static Site</text>
+      <text x="90" y="212" fill="rgba(245,240,232,0.5)" font-size="8.5" text-anchor="middle">+ Replication</text>
+
+      <!-- Serverless section -->
+      <rect x="730" y="130" width="210" height="200" rx="2" fill="rgba(232,147,10,0.04)" stroke="rgba(232,147,10,0.2)" stroke-width="1" stroke-dasharray="4,2"/>
+      <text x="835" y="150" fill="#E8930A" font-size="8.5" text-anchor="middle" letter-spacing="1" font-family="DM Mono, monospace">SERVERLESS</text>
+
+      <rect x="748" y="162" width="174" height="34" rx="2" fill="#12100E" stroke="rgba(245,240,232,0.2)" stroke-width="1"/>
+      <text x="835" y="183" fill="#F5F0E8" font-size="9.5" text-anchor="middle">⚡ Lambda (x2)</text>
+
+      <rect x="748" y="206" width="174" height="34" rx="2" fill="#12100E" stroke="rgba(245,240,232,0.2)" stroke-width="1"/>
+      <text x="835" y="227" fill="#F5F0E8" font-size="9.5" text-anchor="middle">📅 EventBridge</text>
+
+      <rect x="748" y="250" width="174" height="34" rx="2" fill="#12100E" stroke="rgba(245,240,232,0.2)" stroke-width="1"/>
+      <text x="835" y="271" fill="#F5F0E8" font-size="9.5" text-anchor="middle">📢 SNS → Email</text>
+
+      <rect x="748" y="295" width="174" height="28" rx="2" fill="#12100E" stroke="rgba(245,240,232,0.2)" stroke-width="1"/>
+      <text x="835" y="313" fill="rgba(245,240,232,0.5)" font-size="8.5" text-anchor="middle">8AM Daily Report</text>
+
+      <!-- Connect serverless to private -->
+      <line x1="695" y1="205" x2="748" y2="205" stroke="rgba(232,147,10,0.4)" stroke-width="1" stroke-dasharray="4,2" marker-end="url(#arr)"/>
+
+      <!-- ASG to private -->
+      <line x1="480" y1="110" x2="480" y2="160" stroke="rgba(232,147,10,0.3)" stroke-width="1" stroke-dasharray="3,2"/>
+
+      <!-- NAT to internet -->
+      <line x1="90" y1="165" x2="90" y2="130" stroke="rgba(232,147,10,0.2)" stroke-width="1" stroke-dasharray="3,2"/>
+
+      <!-- Phase labels at bottom -->
+      <text x="90" y="370" fill="rgba(232,147,10,0.5)" font-size="9" text-anchor="middle" font-family="DM Mono, monospace">Phase 1</text>
+      <text x="250" y="370" fill="rgba(232,147,10,0.5)" font-size="9" text-anchor="middle" font-family="DM Mono, monospace">Phase 3</text>
+      <text x="480" y="370" fill="rgba(232,147,10,0.5)" font-size="9" text-anchor="middle" font-family="DM Mono, monospace">Phase 2 + 4</text>
+      <text x="835" y="370" fill="rgba(232,147,10,0.5)" font-size="9" text-anchor="middle" font-family="DM Mono, monospace">Phase 5</text>
+
+      <defs>
+        <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 z" fill="#E8930A"/>
+        </marker>
+      </defs>
+    </svg>
+  </div>
+</section>
+
+<!-- PHASES -->
+<div class="band" id="phases">
+  <section>
+    <p class="label">Five Phases</p>
+    <h2 class="section-title fi">Every decision.<br><em>Every tradeoff.</em></h2>
+
+    <!-- PHASE 1 -->
+    <div class="phase-block" style="margin-top:3rem;">
+      <div class="phase-header fi">
+        <div class="phase-number">01</div>
+        <div class="phase-header-text">
+          <div class="phase-badge">Phase One</div>
+          <h3 class="phase-title">Get <em>Online</em></h3>
+          <p style="color:var(--cream-dim);font-size:0.95rem;margin-top:0.5rem;">Amazon S3 · Versioning · Lifecycle Policies · Cross-Region Replication</p>
+        </div>
+      </div>
+      <div class="phase-grid fi">
+        <div class="phase-card">
+          <h4>The Problem</h4>
+          <p>Café Nimbus had no web presence. Customers were finding competitors instead. The site needed to be fast, cheap to run, and impossible to accidentally break during a content update.</p>
+        </div>
+        <div class="phase-card">
+          <h4>What I Built</h4>
+          <p>Static website on Amazon S3 with public access controlled entirely through bucket policy. S3 versioning enabled from day one. Lifecycle policies to transition older versions to S3-IA after 30 days. Cross-region replication as day-one non-negotiable.</p>
+        </div>
+        <div class="phase-card">
+          <h4>Validated</h4>
+          <ul>
+            <li>Site live via S3 endpoint</li>
+            <li>403 confirmed before policy — access correctly blocked</li>
+            <li>File deleted and restored in under 60 seconds</li>
+            <li>Lifecycle rules confirmed active</li>
+            <li>Replication: object in destination bucket within 30 seconds</li>
+          </ul>
+        </div>
+        <div class="phase-card">
+          <h4>The Decision</h4>
+          <p>Cross-region replication from day one. The counter-argument: Café Nimbus is too small for it. My counter: a regional outage hitting their only S3 bucket takes their entire web presence offline with no recovery option. Replication costs pennies at this scale.</p>
+        </div>
+      </div>
+      <div class="insight-block fi">
+        <p><strong>The principle:</strong> Replication from day one, not after the first outage. The cost of preventing a disaster is always lower than the cost of recovering from one.</p>
+      </div>
+    </div>
+
+    <!-- PHASE 2 -->
+    <div class="phase-block">
+      <div class="phase-header fi">
+        <div class="phase-number">02</div>
+        <div class="phase-header-text">
+          <div class="phase-badge">Phase Two</div>
+          <h3 class="phase-title">Get <em>Dynamic</em></h3>
+          <p style="color:var(--cream-dim);font-size:0.95rem;margin-top:0.5rem;">EC2 · LAMP Stack · AMI · Multi-Region Deployment</p>
+        </div>
+      </div>
+      <div class="phase-grid fi">
+        <div class="phase-card">
+          <h4>The Problem</h4>
+          <p>A static site can display a menu. It cannot take orders, manage inventory, or run a real application. Café Nimbus needed a backend — and one that could be reproduced exactly if it ever had to be rebuilt.</p>
+        </div>
+        <div class="phase-card">
+          <h4>What I Built</h4>
+          <p>EC2 running a full LAMP stack — Linux, Apache, MySQL, PHP. After validating end-to-end (menu, order placement, data persistence), I created a golden AMI before touching anything else. From that AMI, launched an identical instance in a second region in minutes.</p>
+        </div>
+        <div class="phase-card">
+          <h4>Validated</h4>
+          <ul>
+            <li>LAMP stack deployed, Apache accessible</li>
+            <li>Menu items loading correctly</li>
+            <li>Order placed and confirmed persisted</li>
+            <li>AMI created from configured instance</li>
+            <li>Second instance from AMI in alternate region — identical</li>
+          </ul>
+        </div>
+        <div class="phase-card">
+          <h4>The Decision</h4>
+          <p>AMI before anything else. A manually configured server that only one person knows how to rebuild is a liability. An AMI is an asset. Every production environment should have a golden image before it serves a single real user.</p>
+        </div>
+      </div>
+      <div class="insight-block fi">
+        <p><strong>The principle:</strong> A manually configured server is a liability. An AMI is an asset. The cost of creating it is an hour. The cost of not having it is a full rebuild under pressure.</p>
+      </div>
+    </div>
+
+    <!-- PHASE 3 -->
+    <div class="phase-block">
+      <div class="phase-header fi">
+        <div class="phase-number">03</div>
+        <div class="phase-header-text">
+          <div class="phase-badge">Phase Three</div>
+          <h3 class="phase-title">Get <em>Secure</em></h3>
+          <p style="color:var(--cream-dim);font-size:0.95rem;margin-top:0.5rem;">Custom VPC · Bastion Host · NAT Gateway · Network ACLs</p>
+        </div>
+      </div>
+      <div class="phase-grid fi">
+        <div class="phase-card">
+          <h4>The Problem</h4>
+          <p>Café Nimbus was going public with their platform. Their infrastructure had no meaningful network boundaries — everything was reachable from everywhere. Security had to be layered. A single misconfigured security group should not be enough to expose the entire backend.</p>
+        </div>
+        <div class="phase-card">
+          <h4>What I Built</h4>
+          <p>Custom VPC with /16 CIDR. Public subnet for ALB and bastion only. Private subnet for all application servers and the database — no public IPs, ever. NAT Gateway for outbound-only private traffic. Network ACLs as a stateless second layer of defence.</p>
+        </div>
+        <div class="phase-card">
+          <h4>Validated</h4>
+          <ul>
+            <li>Private instances unreachable via direct connection</li>
+            <li>Bastion SSH confirmed as only entry path</li>
+            <li>NAT Gateway routing confirmed for private outbound</li>
+            <li>NACL deny rules blocked traffic as expected</li>
+            <li>Permitted traffic passed normally</li>
+          </ul>
+        </div>
+        <div class="phase-card">
+          <h4>The Decision</h4>
+          <p>Security groups + NACLs in combination. Security groups are stateful — they remember connections. NACLs are stateless — they evaluate every packet independently. Having both means a misconfigured security group doesn't automatically become an open door.</p>
+        </div>
+      </div>
+      <div class="insight-block fi">
+        <p><strong>The principle:</strong> No backend resource ever got a public IP. A single misconfigured security group without NACLs as a backstop is one mistake from a complete exposure.</p>
+      </div>
+    </div>
+
+    <!-- PHASE 4 -->
+    <div class="phase-block">
+      <div class="phase-header fi">
+        <div class="phase-number">04</div>
+        <div class="phase-header-text">
+          <div class="phase-badge">Phase Four</div>
+          <h3 class="phase-title">Get <em>Scalable</em></h3>
+          <p style="color:var(--cream-dim);font-size:0.95rem;margin-top:0.5rem;">Application Load Balancer · Auto Scaling Group · Multi-AZ</p>
+        </div>
+      </div>
+      <div class="phase-grid fi">
+        <div class="phase-card">
+          <h4>The Problem</h4>
+          <p>A single EC2 instance — no matter how well configured — is a single point of failure. When traffic spikes during a promotion, the site goes down. When the instance fails, the business goes dark. Neither is acceptable for a company preparing for national expansion.</p>
+        </div>
+        <div class="phase-card">
+          <h4>What I Built</h4>
+          <p>Application Load Balancer across two Availability Zones. Auto Scaling Group triggered by CPU utilization — not a schedule. Minimum instances maintained, scale-out on threshold breach, scale-in when load drops. Health checks replace failed instances automatically.</p>
+        </div>
+        <div class="phase-card">
+          <h4>Validated</h4>
+          <ul>
+            <li>ALB distributing traffic across both AZs</li>
+            <li>Load simulation triggered scale-out within 90 seconds</li>
+            <li>Instance manually terminated mid-test — no visible interruption</li>
+            <li>ASG replaced terminated instance automatically</li>
+            <li>Scale-in confirmed when load dropped</li>
+          </ul>
+        </div>
+        <div class="phase-card">
+          <h4>The Decision</h4>
+          <p>CPU utilization trigger, not scheduled scaling. Traffic is demand-driven, not time-predictable. Scheduling assumes you know when customers will come. Utilization-based scaling responds to what's actually happening.</p>
+        </div>
+      </div>
+      <div class="insight-block fi">
+        <p><strong>The principle:</strong> Multi-AZ is not a luxury. A single-AZ deployment with ten instances is still a single point of failure. Two AZs with two instances each is genuinely resilient.</p>
+      </div>
+    </div>
+
+    <!-- PHASE 5 -->
+    <div class="phase-block">
+      <div class="phase-header fi">
+        <div class="phase-number">05</div>
+        <div class="phase-header-text">
+          <div class="phase-badge">Phase Five</div>
+          <h3 class="phase-title">Get <em>Autonomous</em></h3>
+          <p style="color:var(--cream-dim);font-size:0.95rem;margin-top:0.5rem;">AWS Lambda · Amazon SNS · Amazon EventBridge</p>
+        </div>
+      </div>
+      <div class="phase-grid fi">
+        <div class="phase-card">
+          <h4>The Problem</h4>
+          <p>Every morning, the operations team spent 45 minutes manually pulling the previous day's sales data and emailing it to management. Error-prone, time-consuming, and entirely unnecessary. The solution had to be serverless — running a cron job on EC2 means paying compute 24/7 for a 30-second task.</p>
+        </div>
+        <div class="phase-card">
+          <h4>What I Built</h4>
+          <p>Two Lambda functions: DataExtractor (queries RDS inside VPC) and SalesAnalysisReport (formats and delivers the report). SNS email topic for the operations distribution list. EventBridge rule fires at 8AM daily — no human involved, no idle compute.</p>
+        </div>
+        <div class="phase-card">
+          <h4>Validated</h4>
+          <ul>
+            <li>DataExtractor confirmed connecting to RDS within VPC</li>
+            <li>Sales data pulled and formatted correctly</li>
+            <li>SNS subscription confirmed active</li>
+            <li>Lambda manually triggered — email within 30 seconds</li>
+            <li>EventBridge scheduled execution confirmed</li>
+          </ul>
+        </div>
+        <div class="phase-card">
+          <h4>The Decision</h4>
+          <p>Lambda, not a cron job on EC2. Lambda runs only when triggered — at this workload, monthly cost is effectively zero. An EC2-based cron costs $15–30/month to idle 24/7 for a task that executes once per day. Serverless is not always the right answer. Here, it is the only answer.</p>
+        </div>
+      </div>
+      <div class="insight-block fi">
+        <p><strong>The principle:</strong> The infrastructure does not need a human to survive a failure, handle a traffic spike, or send the morning report. That was the mandate. This is the result.</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- DECISION LOG -->
+<section id="decisions">
+  <p class="label">Architecture Decision Log</p>
+  <h2 class="section-title fi">Every choice. <em>Every reason.</em></h2>
+  <p class="section-body fi">Architecture is not a list of what was built. It is a record of what was chosen and what was rejected — and why those tradeoffs were made in this order, for this client, at this stage.</p>
+
+  <div class="fi" style="overflow-x:auto;">
+    <table class="decision-table">
+      <thead>
+        <tr>
+          <th>Decision</th>
+          <th>Chosen ✓</th>
+          <th>Rejected ✗</th>
+          <th>Rationale</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Static hosting</td><td class="chosen">S3 + bucket policy</td><td class="rejected">EC2-hosted static site</td><td>No reason to run compute for files that never change</td></tr>
+        <tr><td>Content protection</td><td class="chosen">S3 versioning day one</td><td class="rejected">No versioning</td><td>Accidental overwrites have no recovery path without it</td></tr>
+        <tr><td>Regional resilience</td><td class="chosen">Cross-region replication</td><td class="rejected">Single-region only</td><td>One regional outage = total web presence loss</td></tr>
+        <tr><td>Server reproducibility</td><td class="chosen">AMI before second deploy</td><td class="rejected">Manual reconfiguration</td><td>A manually built server cannot be rebuilt reliably under pressure</td></tr>
+        <tr><td>Backend access</td><td class="chosen">Bastion host only</td><td class="rejected">Direct SSH + public IP</td><td>No backend resource should ever have a direct public route</td></tr>
+        <tr><td>Outbound private traffic</td><td class="chosen">NAT Gateway</td><td class="rejected">Public subnet for EC2s</td><td>Private isolation requires outbound-only — not bidirectional</td></tr>
+        <tr><td>Network defence</td><td class="chosen">SGs + NACLs combined</td><td class="rejected">Security groups alone</td><td>One misconfigured SG without NACLs = open door</td></tr>
+        <tr><td>Scaling trigger</td><td class="chosen">CPU utilization</td><td class="rejected">Scheduled scaling</td><td>Traffic is demand-driven, not time-predictable</td></tr>
+        <tr><td>AZ strategy</td><td class="chosen">Multi-AZ ALB + ASG</td><td class="rejected">Single-AZ more instances</td><td>Single AZ is a single point of failure regardless of count</td></tr>
+        <tr><td>Reporting automation</td><td class="chosen">Lambda + EventBridge</td><td class="rejected">Cron job on EC2</td><td>Idle compute 24/7 for a 30-second daily task</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- TECH STACK -->
+<div class="band" id="stack">
+  <section>
+    <p class="label">Technologies Used</p>
+    <h2 class="section-title fi">13 services.<br><em>One infrastructure.</em></h2>
+    <div class="tech-grid fi">
+      <div class="tech-item"><div class="tech-service">Amazon S3</div><div class="tech-role">Static hosting, versioning, lifecycle, cross-region replication</div></div>
+      <div class="tech-item"><div class="tech-service">Amazon EC2</div><div class="tech-role">Application compute, LAMP stack, bastion host</div></div>
+      <div class="tech-item"><div class="tech-service">Amazon VPC</div><div class="tech-role">Network isolation, public/private subnet segmentation</div></div>
+      <div class="tech-item"><div class="tech-service">Internet Gateway</div><div class="tech-role">Public subnet internet access</div></div>
+      <div class="tech-item"><div class="tech-service">NAT Gateway</div><div class="tech-role">Outbound-only internet access for private subnet</div></div>
+      <div class="tech-item"><div class="tech-service">Network ACLs</div><div class="tech-role">Stateless subnet-level traffic control layer</div></div>
+      <div class="tech-item"><div class="tech-service">App Load Balancer</div><div class="tech-role">Traffic distribution across AZs, health checking</div></div>
+      <div class="tech-item"><div class="tech-service">Auto Scaling Group</div><div class="tech-role">Demand-based compute scaling, auto instance replacement</div></div>
+      <div class="tech-item"><div class="tech-service">AWS Lambda</div><div class="tech-role">Serverless data extraction and report generation</div></div>
+      <div class="tech-item"><div class="tech-service">Amazon RDS</div><div class="tech-role">Managed MySQL database for application data</div></div>
+      <div class="tech-item"><div class="tech-service">Amazon SNS</div><div class="tech-role">Email notification delivery for sales reports</div></div>
+      <div class="tech-item"><div class="tech-service">Amazon EventBridge</div><div class="tech-role">Scheduled Lambda trigger — 8AM daily</div></div>
+      <div class="tech-item"><div class="tech-service">AWS AMI</div><div class="tech-role">Golden image capture for reproducible deployments</div></div>
+    </div>
+  </section>
+</div>
+
+<!-- WHAT I'D ADD -->
+<section>
+  <p class="label">What I'd Add in Production</p>
+  <h2 class="section-title fi">No architecture <em>is finished.</em></h2>
+  <p class="section-body fi">These are the gaps I would close before calling this production-ready for a real business.</p>
+  <div class="future-grid fi">
+    <div class="future-card">
+      <h4>AWS WAF on ALB</h4>
+      <p>The load balancer is publicly exposed. Without a Web Application Firewall, SQL injection and XSS have no automated defence at the network edge.</p>
+    </div>
+    <div class="future-card">
+      <h4>RDS + Secrets Manager</h4>
+      <p>In a hardened environment, RDS credentials would be rotated automatically through Secrets Manager — no application code would contain a hardcoded password.</p>
+    </div>
+    <div class="future-card">
+      <h4>CloudTrail — All Regions</h4>
+      <p>Every API call in the account should be logged. Without CloudTrail, there is no audit trail if something goes wrong or someone does something they shouldn't.</p>
+    </div>
+    <div class="future-card">
+      <h4>VPC Endpoints for S3</h4>
+      <p>Traffic between EC2 and S3 currently routes through NAT Gateway. VPC Endpoints keep that traffic on the AWS private network and eliminate the NAT cost.</p>
+    </div>
+    <div class="future-card">
+      <h4>CloudWatch Dashboard</h4>
+      <p>ALB request count, ASG instance count, Lambda errors, and RDS connections — all visible in one place, with SNS alarms when anything goes out of range.</p>
+    </div>
+    <div class="future-card">
+      <h4>WAF + Shield</h4>
+      <p>For a nationally expanding café brand, DDoS protection at the ALB layer moves from a nice-to-have to a business continuity requirement.</p>
+    </div>
+  </div>
+</section>
+
+<!-- RESULT -->
+<div class="band" id="result">
+  <section>
+    <p class="label">The Result</p>
+    <h2 class="section-title fi">Five layers.<br><em>Zero manual steps.</em></h2>
+    <ul class="result-list fi">
+      <li><div class="result-check">✓</div><div class="result-text"><strong>Serves static content globally</strong> from S3 with automatic regional failover — no server, no maintenance.</div></li>
+      <li><div class="result-check">✓</div><div class="result-text"><strong>Runs a dynamic application</strong> on compute that rebuilds itself from a golden image — reproducible by design.</div></li>
+      <li><div class="result-check">✓</div><div class="result-text"><strong>Isolates every backend resource</strong> behind a secure network boundary — no public IPs, no direct routes, two layers of control.</div></li>
+      <li><div class="result-check">✓</div><div class="result-text"><strong>Scales automatically</strong> in response to real traffic — not a schedule someone set and forgot.</div></li>
+      <li><div class="result-check">✓</div><div class="result-text"><strong>Reports on itself every morning at 8AM</strong> without a single manual step — Lambda, SNS, EventBridge, working while no one is watching.</div></li>
+    </ul>
+    <div class="insight-block fi" style="margin-top:3rem;">
+      <p>The infrastructure does not need a human to survive a failure. It does not need a human to handle a traffic spike. And it does not need a human to send the morning sales report. <strong>That was the mandate. That is the result.</strong></p>
+    </div>
+  </section>
+</div>
+
+<!-- FOOTER -->
+<footer id="contact">
+  <div>
+    <h3 class="footer-name">Md Rahat<br>Islam Anik</h3>
+    <p class="footer-bio">Cloud & IT Infrastructure specialist based in Toronto, ON. AWS · Azure · Microsoft 365 · Power Automate. 6+ years of IT experience. 9 certifications. Open to the right role.</p>
+    <div class="btn-row">
+      <a class="btn-a" href="https://linkedin.com/in/rahatislamanik" target="_blank">LinkedIn ↗</a>
+      <a class="btn-b" href="https://github.com/rahatislamanik-spec" target="_blank">GitHub ↗</a>
+    </div>
+  </div>
+  <div>
+    <p class="label" style="margin-bottom:1.5rem;">More Portfolio Projects</p>
+    <div class="other-projects">
+      <a class="proj-link" href="https://rahatislamanik-spec.github.io/Project-Arabesque" target="_blank">
+        <div><div class="proj-link-name">Project Arabesque</div><div class="proj-link-meta">M365 IT Automation · Canada's National Ballet School</div></div>
+        <span class="proj-link-arrow">→</span>
+      </a>
+      <a class="proj-link" href="https://rahatislamanik-spec.github.io/TechNova-Azure-Infrastructure" target="_blank">
+        <div><div class="proj-link-name">TechNova</div><div class="proj-link-meta">Azure Hub-and-Spoke Infrastructure · Case Study</div></div>
+        <span class="proj-link-arrow">→</span>
+      </a>
+      <a class="proj-link" href="https://github.com/rahatislamanik-spec" target="_blank">
+        <div><div class="proj-link-name">GitHub Portfolio</div><div class="proj-link-meta">github.com/rahatislamanik-spec</div></div>
+        <span class="proj-link-arrow">→</span>
+      </a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('vis'), i * 70);
+        obs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.08 });
+  document.querySelectorAll('.fi').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>
