@@ -1,10 +1,10 @@
 # Café Nimbus — AWS Cloud Infrastructure Case Study
 
-> "Café Nimbus came to me with one broken server and no plan 
+> Café Nimbus came to me with one broken server and no plan 
 > for growth. I left them with an infrastructure that scales 
 > automatically, recovers from failures without human intervention, 
 > and reports on itself every morning — without anyone touching 
-> a keyboard."
+> a keyboard.
 
 ## The Engagement
 
