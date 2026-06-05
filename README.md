@@ -2,7 +2,7 @@
 
 ### Five-Phase AWS Architecture · From One Broken Server to a Self-Operating Cloud
 
-**Md Rahat Islam Anik · Self-Directed Case Study · 2025**
+**Md Rahat Islam Anik · Cloud Infrastructure Case Study · 2026**
 
 [![Live Case Study](https://img.shields.io/badge/Live%20Case%20Study-View%20Now-FF9900?style=for-the-badge&logo=amazon-aws&logoColor=white)](https://rahatislamanik-spec.github.io/Cafe-Nimbus)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-rahatislamanik-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://linkedin.com/in/rahatislamanik)
@@ -12,6 +12,18 @@
 
 | 5 Phases | 13 AWS Services | Multi-AZ | 0 Manual Steps |
 |:---:|:---:|:---:|:---:|
+
+---
+
+## The Problem
+
+Café Nimbus operated their entire online presence on a single EC2 instance — no redundancy, no backups, no scalability, no automation. One traffic spike or hardware failure meant complete business disruption for a brand preparing for national expansion.
+
+## The Solution
+
+A 5-phase AWS infrastructure engagement: static hosting with cross-region replication, a reproducible LAMP stack locked into a golden AMI, full VPC network segmentation with private subnets and bastion access, a multi-AZ Auto Scaling architecture, and a fully serverless daily reporting pipeline via Lambda, SNS, and EventBridge.
+
+**The infrastructure now scales, heals, and reports on itself — without human intervention.**
 
 ---
 
@@ -200,7 +212,7 @@ The full interactive case study — with architecture diagrams, per-phase docume
 ## Author
 
 **Md Rahat Islam Anik**
-Cloud Computing & Network Administration · George Brown College · May 2026
+Cloud & Infrastructure Operations Specialist · Toronto, Canada
 
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0A66C2?style=flat&logo=linkedin)](https://linkedin.com/in/rahatislamanik)
 [![GitHub](https://img.shields.io/badge/GitHub-Portfolio-181717?style=flat&logo=github)](https://github.com/rahatislamanik-spec)
