@@ -31,6 +31,79 @@ A 5-phase AWS architecture case study: static hosting with cross-region replicat
 
 ---
 
+
+## Architecture
+
+```mermaid
+flowchart TB
+    subgraph Users["👥 Users / Customers"]
+        user([User Browser])
+    end
+
+    subgraph DNS["🌐 DNS Layer"]
+        route53[Route 53]
+    end
+
+    subgraph VPC["🔒 VPC — Public & Private Subnets"]
+        subgraph PublicSubnets["Public Subnets — us-east-1a / us-east-1b"]
+            alb[Application Load Balancer]
+            nat[NAT Gateway]
+        end
+        subgraph PrivateSubnets["Private Subnets — us-east-1a / us-east-1b"]
+            asg[Auto Scaling Group]
+            ec2a[EC2 Instance A]
+            ec2b[EC2 Instance B]
+            rds[(RDS PostgreSQL)]
+        end
+    end
+
+    subgraph Storage["📦 Storage"]
+        s3[(S3 Static Assets)]
+    end
+
+    subgraph Serverless["⚡ Serverless Automation"]
+        eventbridge[EventBridge — Daily 8AM]
+        lambda[Lambda — order_notification.py]
+        sns[SNS — cafe-order-notifications]
+    end
+
+    subgraph Monitoring["📊 Monitoring"]
+        cloudwatch[CloudWatch Logs & Metrics]
+    end
+
+    user --> route53
+    route53 --> alb
+    alb --> asg
+    asg --> ec2a & ec2b
+    ec2a & ec2b --> rds
+    ec2a & ec2b --> s3
+    ec2a --> eventbridge
+    eventbridge --> lambda
+    lambda --> sns
+    ec2a & ec2b & alb & rds --> cloudwatch
+    PrivateSubnets --> nat
+
+    classDef userStyle fill:#E3F2FD,stroke:#1976D2,stroke-width:2px,color:#000
+    classDef dnsStyle fill:#FFF3E0,stroke:#F57C00,stroke-width:2px,color:#000
+    classDef networkStyle fill:#F3E5F5,stroke:#7B1FA2,stroke-width:2px,color:#000
+    classDef computeStyle fill:#E8F5E9,stroke:#388E3C,stroke-width:2px,color:#000
+    classDef dataStyle fill:#FFF8E1,stroke:#FFA000,stroke-width:2px,color:#000
+    classDef serverlessStyle fill:#FCE4EC,stroke:#C2185B,stroke-width:2px,color:#000
+    classDef monitoringStyle fill:#ECEFF1,stroke:#455A64,stroke-width:2px,color:#000
+
+    class user userStyle
+    class route53 dnsStyle
+    class alb,nat networkStyle
+    class asg,ec2a,ec2b computeStyle
+    class rds,s3 dataStyle
+    class eventbridge,lambda,sns serverlessStyle
+    class cloudwatch monitoringStyle
+```
+
+> ALB in public subnets — EC2, RDS in private subnets — no public IPs on application layer.
+> See [DESIGN-DECISIONS.md](DESIGN-DECISIONS.md) for architectural rationale.
+
+---
 ## The Engagement
 
 Café Nimbus is a growing café brand preparing for expansion. In this scenario, their online presence depends on a fragile single-server model: limited redundancy, limited backup strategy, limited scaling, and no automation plan for recurring operations work.
@@ -228,6 +301,10 @@ The value of this repo is the architecture reasoning: what to build, why those s
 The full interactive case study — with architecture diagrams, per-phase documentation, and the complete decision log — is published at:
 
 **[rahatislamanik-spec.github.io/Cafe-Nimbus](https://rahatislamanik-spec.github.io/Cafe-Nimbus)**
+
+---
+
+> 📋 **Evidence note:** AWS console screenshots are not currently included. See [docs/evidence-note.md](docs/evidence-note.md) for details.
 
 ---
 
