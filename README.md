@@ -1,6 +1,6 @@
-# Café Nimbus — AWS Cloud Infrastructure Case Study
+# Café Nimbus — AWS Infrastructure Architecture Case Study
 
-### Five-Phase AWS Architecture · From One Broken Server to a Self-Operating Cloud
+### Five-Phase AWS Architecture · Availability, Segmentation, Automation, and Production Readiness
 
 **Md Rahat Islam Anik · Cloud Infrastructure Case Study · 2026**
 
@@ -10,32 +10,32 @@
 
 ---
 
-| 5 Phases | 13 AWS Services | Multi-AZ | 0 Manual Steps |
+| 5 Phases | 13 AWS Services | Architecture Design | Production Readiness Review |
 |:---:|:---:|:---:|:---:|
 
 ---
 
 ## The Problem
 
-Café Nimbus operated their entire online presence on a single EC2 instance — no redundancy, no backups, no scalability, no automation. One traffic spike or hardware failure meant complete business disruption for a brand preparing for national expansion.
+Café Nimbus is a business-style AWS scenario: a growing café brand needs to move beyond a fragile single-server model and plan for availability, network segmentation, reproducible deployments, scaling, and scheduled reporting automation.
 
 ## The Solution
 
-A 5-phase AWS infrastructure engagement: static hosting with cross-region replication, a reproducible LAMP stack locked into a golden AMI, full VPC network segmentation with private subnets and bastion access, a multi-AZ Auto Scaling architecture, and a fully serverless daily reporting pipeline via Lambda, SNS, and EventBridge.
+A 5-phase AWS architecture case study: static hosting with cross-region replication, a reproducible LAMP-stack pattern with a golden AMI, VPC network segmentation with private subnets and bastion access, a multi-AZ load balancing and Auto Scaling design, and a serverless daily reporting workflow using Lambda, SNS, and EventBridge.
 
-**The infrastructure now scales, heals, and reports on itself — without human intervention.**
+**The design shows how the environment could scale, recover, and reduce manual reporting work when implemented and validated in AWS.**
 
 ---
 
-> *"Café Nimbus came to me with one broken server and no plan for growth. I left them with an infrastructure that scales automatically, recovers from failures without human intervention, and reports on itself every morning — without anyone touching a keyboard."*
+> *"Café Nimbus is an AWS architecture case study showing how a fragile single-server environment can be redesigned into a segmented, scalable, and automation-ready cloud platform."*
 
 ---
 
 ## The Engagement
 
-Café Nimbus is a growing café brand preparing for national expansion. When this engagement began, their entire online presence ran on a single EC2 instance — no redundancy, no backups, no plan for what happens when traffic spikes during a promotion. One bad day and the whole operation goes dark.
+Café Nimbus is a growing café brand preparing for expansion. In this scenario, their online presence depends on a fragile single-server model: limited redundancy, limited backup strategy, limited scaling, and no automation plan for recurring operations work.
 
-The mandate: build an AWS infrastructure that could grow with the business, survive failures automatically, and operate with as little manual intervention as possible.
+The mandate: design an AWS infrastructure that could grow with the business, reduce single points of failure, and automate repeatable reporting work where serverless services make sense.
 
 What followed was a five-phase architectural engagement. Each phase solved a specific business problem. Each phase made the next one possible.
 
@@ -48,13 +48,13 @@ What followed was a five-phase architectural engagement. Each phase solved a spe
 
 **The Problem:** Café Nimbus had no web presence. Customers were finding competitors instead. The site needed to be fast, cheap to run, and impossible to accidentally break during a content update.
 
-**What Was Built:** Static website on Amazon S3 with public access controlled entirely through bucket policy. S3 versioning enabled from day one. Lifecycle policies to transition older versions to S3-IA after 30 days. Cross-region replication as a day-one non-negotiable.
+**Architecture Pattern:** Static website on Amazon S3 with public access controlled through bucket policy. S3 versioning, lifecycle policy, and cross-region replication are included as availability and recovery controls.
 
-**Validated:**
-- Site live via S3 endpoint
-- 403 confirmed before policy — access correctly blocked
-- File deleted and restored in under 60 seconds
-- Replication: object in destination bucket within 30 seconds
+**Validation Plan:**
+- Confirm site access through S3 static website hosting or CloudFront
+- Confirm blocked access before public bucket policy is applied
+- Test file version restore
+- Confirm object replication to destination bucket
 
 > **The principle:** Replication from day one, not after the first outage. The cost of preventing a disaster is always lower than the cost of recovering from one.
 
@@ -65,13 +65,13 @@ What followed was a five-phase architectural engagement. Each phase solved a spe
 
 **The Problem:** A static site can display a menu. It cannot take orders, manage inventory, or run a real application. Café Nimbus needed a backend — and one that could be reproduced exactly if it ever had to be rebuilt.
 
-**What Was Built:** EC2 running a full LAMP stack — Linux, Apache, MySQL, PHP. After validating end-to-end (menu, order placement, data persistence), a golden AMI was created before touching anything else. From that AMI, an identical instance was launched in a second region in minutes.
+**Architecture Pattern:** EC2 running a LAMP stack — Linux, Apache, MySQL, PHP. After application validation, a golden AMI would be created so the application server can be rebuilt consistently.
 
-**Validated:**
-- LAMP stack deployed, Apache accessible
-- Menu items loading correctly, orders persisted to database
-- AMI created from configured instance
-- Second instance from AMI in alternate region — identical
+**Validation Plan:**
+- Confirm Apache and PHP application availability
+- Confirm menu/order workflow and database persistence
+- Create AMI from configured instance
+- Launch replacement instance from AMI and compare configuration
 
 > **The principle:** A manually configured server is a liability. An AMI is an asset. The cost of creating it is an hour. The cost of not having it is a full rebuild under pressure.
 
@@ -82,13 +82,13 @@ What followed was a five-phase architectural engagement. Each phase solved a spe
 
 **The Problem:** The platform was going public with no meaningful network boundaries — everything was reachable from everywhere. Security had to be layered. A single misconfigured security group should not be enough to expose the entire backend.
 
-**What Was Built:** Custom VPC with /16 CIDR. Public subnet for ALB and bastion only. Private subnet for all application servers and the database — no public IPs, ever. NAT Gateway for outbound-only private traffic. Network ACLs as a stateless second layer of defence on top of security groups.
+**Architecture Pattern:** Custom VPC with public and private subnet separation. Public subnets host internet-facing entry points such as ALB and bastion access; private subnets host application and database resources. NAT Gateway provides outbound-only internet access for private resources, and NACLs add a stateless subnet control layer.
 
-**Validated:**
-- Private instances unreachable via direct connection
-- Bastion SSH confirmed as only entry path
-- NAT Gateway routing confirmed for private outbound
-- NACL deny rules blocked traffic as expected
+**Validation Plan:**
+- Confirm private instances are not directly reachable from the internet
+- Confirm bastion or Session Manager access path
+- Confirm private subnet outbound routing through NAT Gateway
+- Test NACL deny and allow behavior
 
 > **The principle:** No backend resource ever gets a public IP. A single misconfigured security group without NACLs as a backstop is one mistake from a complete exposure.
 
@@ -99,14 +99,13 @@ What followed was a five-phase architectural engagement. Each phase solved a spe
 
 **The Problem:** A single EC2 instance — no matter how well configured — is a single point of failure. When traffic spikes during a promotion, the site goes down. When the instance fails, the business goes dark. Neither is acceptable for a company preparing for national expansion.
 
-**What Was Built:** Application Load Balancer across two Availability Zones. Auto Scaling Group triggered by CPU utilization — not a schedule. Minimum instances maintained at all times, scale-out on threshold breach, scale-in when load drops. Health checks replace failed instances automatically.
+**Architecture Pattern:** Application Load Balancer across two Availability Zones with an Auto Scaling Group. CPU utilization is used as the example scaling trigger, with health checks and replacement behavior included in the design.
 
-**Validated:**
-- ALB distributing traffic across both AZs
-- Load simulation triggered scale-out within 90 seconds
-- Instance manually terminated mid-test — no visible service interruption
-- ASG replaced terminated instance automatically
-- Scale-in confirmed when load dropped
+**Validation Plan:**
+- Confirm ALB target registration across both Availability Zones
+- Run controlled load test to trigger scale-out
+- Terminate one instance and confirm ASG replacement
+- Confirm scale-in behavior after load drops
 
 > **The principle:** Multi-AZ is not a luxury. A single-AZ deployment with ten instances is still a single point of failure. Two AZs with two instances each is genuinely resilient.
 
@@ -117,14 +116,13 @@ What followed was a five-phase architectural engagement. Each phase solved a spe
 
 **The Problem:** Every morning, the operations team spent 45 minutes manually pulling the previous day's sales data and emailing it to management. Error-prone, time-consuming, and entirely unnecessary.
 
-**What Was Built:** Two Lambda functions — `DataExtractor` (queries RDS inside the VPC) and `SalesAnalysisReport` (formats and delivers the report). SNS email topic for the operations distribution list. EventBridge rule fires at 8AM daily — no human involved, no idle compute.
+**Architecture Pattern:** Two Lambda functions — `DataExtractor` for collecting data and `SalesAnalysisReport` for formatting the report. SNS delivers the report to a distribution list, and EventBridge triggers the workflow on a daily schedule.
 
-**Validated:**
-- DataExtractor confirmed connecting to RDS within VPC
-- Sales data pulled and formatted correctly
-- SNS subscription confirmed active
-- Lambda manually triggered — email delivered within 30 seconds
-- EventBridge scheduled execution confirmed
+**Validation Plan:**
+- Confirm Lambda VPC access where required
+- Confirm report data extraction and formatting
+- Confirm SNS subscription delivery
+- Confirm EventBridge scheduled invocation
 
 > **The principle:** Lambda, not a cron job on EC2. Lambda runs only when triggered — monthly cost at this workload is effectively zero. An EC2-based cron costs $15–30/month to idle 24/7 for a task that executes once per day. Serverless is not always the right answer. Here, it is the only answer.
 
@@ -137,7 +135,7 @@ What followed was a five-phase architectural engagement. Each phase solved a spe
 | Static hosting | S3 + bucket policy | EC2-hosted static site | No reason to run compute for files that never change |
 | Content protection | S3 versioning day one | No versioning | Accidental overwrites have no recovery path without it |
 | Regional resilience | Cross-region replication | Single-region only | One regional outage = total web presence loss |
-| Server reproducibility | AMI before second deploy | Manual reconfiguration | A manually built server cannot be rebuilt reliably under pressure |
+| Server reproducibility | AMI before repeat deploy | Manual reconfiguration | A manually built server cannot be rebuilt reliably under pressure |
 | Backend access | Bastion host only | Direct SSH + public IP | No backend resource should ever have a direct public route |
 | Outbound private traffic | NAT Gateway | Public subnet for EC2s | Private isolation requires outbound-only — not bidirectional |
 | Network defence | SGs + NACLs combined | Security groups alone | One misconfigured SG without NACLs = open door |
@@ -167,6 +165,30 @@ What followed was a five-phase architectural engagement. Each phase solved a spe
 
 ---
 
+## Evidence Status
+
+| Area | Status | Notes |
+|---|---|---|
+| AWS architecture flow | Documented | Architecture is described in README and live HTML case study |
+| Static hosting pattern | Designed | No retained AWS screenshots in this repository |
+| LAMP/AMI pattern | Designed | No retained EC2 screenshots or server build scripts |
+| VPC segmentation pattern | Designed | No retained VPC/subnet/route-table screenshots |
+| ALB and Auto Scaling pattern | Designed | No retained load-test screenshots or metrics |
+| Lambda/SNS/EventBridge reporting pattern | Designed | No retained Lambda code or delivery screenshots |
+| Production hardening gaps | Documented | WAF, CloudTrail, Secrets Manager, VPC endpoints, and monitoring are listed as production additions |
+
+See [docs/evidence-map.md](docs/evidence-map.md) for the evidence and validation map.
+
+---
+
+## Limitations
+
+This repository currently documents the AWS architecture and decision-making process. It does not include retained AWS console screenshots, infrastructure-as-code, application source code, Lambda code, CloudWatch metrics, or load-test output.
+
+To present this as a fully implemented build, the repository would need screenshot evidence or source artifacts for each phase. Until then, it should be read as an AWS architecture and production-readiness case study.
+
+---
+
 ## What I'd Add in Production
 
 **AWS WAF on ALB** — The load balancer is publicly exposed. Without a Web Application Firewall, SQL injection and XSS have no automated defence at the network edge.
@@ -191,13 +213,13 @@ What followed was a five-phase architectural engagement. Each phase solved a spe
 
 ## The Result
 
-- **Serves static content globally** from S3 with automatic regional failover — no server, no maintenance
-- **Runs a dynamic application** on compute that rebuilds itself from a golden image — reproducible by design
-- **Isolates every backend resource** behind a secure network boundary — no public IPs, no direct routes, two layers of control
-- **Scales automatically** in response to real traffic — not a schedule someone set and forgot
-- **Reports on itself every morning at 8AM** without a single manual step — Lambda, SNS, EventBridge, working while no one is watching
+- **Documents a static hosting pattern** using S3, versioning, lifecycle policy, and cross-region replication
+- **Documents a reproducible compute pattern** using EC2, LAMP, and AMI-based rebuild planning
+- **Documents a segmented network pattern** using public/private subnets, bastion access, NAT Gateway, security groups, and NACLs
+- **Documents a scalable application pattern** using ALB, Auto Scaling, and Multi-AZ placement
+- **Documents a reporting automation pattern** using Lambda, SNS, and EventBridge
 
-The infrastructure does not need a human to survive a failure. It does not need a human to handle a traffic spike. And it does not need a human to send the morning sales report. **That was the mandate. That is the result.**
+The value of this repo is the architecture reasoning: what to build, why those services were chosen, what tradeoffs were rejected, and what production controls would still need to be added before a real go-live.
 
 ---
 
