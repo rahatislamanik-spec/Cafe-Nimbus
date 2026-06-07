@@ -90,7 +90,7 @@ What followed was a five-phase architectural engagement. Each phase solved a spe
 - Confirm private subnet outbound routing through NAT Gateway
 - Test NACL deny and allow behavior
 
-> **The principle:** No backend resource ever gets a public IP. A single misconfigured security group without NACLs as a backstop is one mistake from a complete exposure.
+> **The principle:** Backend resources should avoid direct public exposure. Security groups and NACLs together provide layered controls, but production still needs logging, monitoring, and access review.
 
 ---
 

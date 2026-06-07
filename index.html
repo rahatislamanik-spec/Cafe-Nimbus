@@ -605,8 +605,8 @@
       <span>AWS Cloud Infrastructure · Five-Phase Architecture · Self-Directed Case Study</span>
     </div>
     <h1 class="hero-title">Café<br>Nimbus</h1>
-    <p class="hero-title-sub">From one broken server to a self-operating cloud.</p>
-    <p class="hero-lead">"Café Nimbus came to me with one broken server and no plan for growth. I left them with an infrastructure that scales automatically, recovers from failures without human intervention, and reports on itself every morning — without anyone touching a keyboard."</p>
+    <p class="hero-title-sub">From single-server risk to AWS architecture planning.</p>
+    <p class="hero-lead">"Café Nimbus is an AWS architecture case study showing how a fragile single-server environment can be redesigned into a segmented, scalable, and automation-ready cloud platform."</p>
 
     <div class="hero-phases">
       <div class="phase-dot">
@@ -640,16 +640,16 @@
     <p class="label">The Engagement</p>
     <h2 class="section-title fi">A café brand.<br>One server. <em>No plan.</em></h2>
     <div class="divider"></div>
-    <p class="section-body fi">Café Nimbus is a growing café brand preparing for national expansion. When I came on board, their entire online presence ran on a single EC2 instance — no redundancy, no backups, no plan for what happens when traffic spikes during a promotion. One bad day and the whole operation goes dark.</p>
+    <p class="section-body fi">Café Nimbus is a growing café brand preparing for national expansion. In this scenario, their online presence depends on a fragile single-server model: limited redundancy, limited backup strategy, limited scaling, and no automation plan for recurring operations work.</p>
     <br>
-    <p class="section-body fi">My mandate: build an AWS infrastructure that could grow with the business, survive failures automatically, and operate with as little manual intervention as possible. What followed was a five-phase architectural engagement. Each phase solved a specific business problem. Each phase made the next one possible.</p>
+    <p class="section-body fi">The mandate: design an AWS infrastructure that could grow with the business, reduce single points of failure, and automate repeatable reporting work where serverless services make sense. What followed was a five-phase architecture case study. Each phase solves a specific business problem and prepares the next layer.</p>
   </section>
 </div>
 
 <!-- ARCHITECTURE OVERVIEW -->
 <section>
   <p class="label">Architecture Overview</p>
-  <h2 class="section-title fi">The full <em>AWS stack</em></h2>
+  <h2 class="section-title fi">The AWS <em>architecture plan</em></h2>
   <div class="arch-wrap fi">
     <svg class="arch-svg" viewBox="0 0 960 440" xmlns="http://www.w3.org/2000/svg" font-family="DM Sans, sans-serif">
       <rect width="960" height="440" fill="#2C251F"/>
@@ -754,6 +754,7 @@
       </defs>
     </svg>
   </div>
+  <p class="section-body fi" style="margin-top:1.25rem;font-size:1rem;">This diagram is a conceptual architecture plan. The repository documents service choices, tradeoffs, validation steps, and production gaps; it does not currently include retained AWS console screenshots or source artifacts.</p>
 </section>
 
 <!-- PHASES -->
@@ -778,17 +779,17 @@
           <p>Café Nimbus had no web presence. Customers were finding competitors instead. The site needed to be fast, cheap to run, and impossible to accidentally break during a content update.</p>
         </div>
         <div class="phase-card">
-          <h4>What I Built</h4>
-          <p>Static website on Amazon S3 with public access controlled entirely through bucket policy. S3 versioning enabled from day one. Lifecycle policies to transition older versions to S3-IA after 30 days. Cross-region replication as day-one non-negotiable.</p>
+          <h4>Architecture Pattern</h4>
+          <p>Static website on Amazon S3 with public access controlled through bucket policy. S3 versioning, lifecycle policy, and cross-region replication are included as availability and recovery controls.</p>
         </div>
         <div class="phase-card">
-          <h4>Validated</h4>
+          <h4>Validation Plan</h4>
           <ul>
-            <li>Site live via S3 endpoint</li>
-            <li>403 confirmed before policy — access correctly blocked</li>
-            <li>File deleted and restored in under 60 seconds</li>
-            <li>Lifecycle rules confirmed active</li>
-            <li>Replication: object in destination bucket within 30 seconds</li>
+            <li>Confirm site access through S3 static website hosting or CloudFront</li>
+            <li>Confirm blocked access before public bucket policy is applied</li>
+            <li>Test file version restore</li>
+            <li>Confirm lifecycle policy behavior</li>
+            <li>Confirm object replication to destination bucket</li>
           </ul>
         </div>
         <div class="phase-card">
@@ -817,22 +818,22 @@
           <p>A static site can display a menu. It cannot take orders, manage inventory, or run a real application. Café Nimbus needed a backend — and one that could be reproduced exactly if it ever had to be rebuilt.</p>
         </div>
         <div class="phase-card">
-          <h4>What I Built</h4>
-          <p>EC2 running a full LAMP stack — Linux, Apache, MySQL, PHP. After validating end-to-end (menu, order placement, data persistence), I created a golden AMI before touching anything else. From that AMI, launched an identical instance in a second region in minutes.</p>
+          <h4>Architecture Pattern</h4>
+          <p>EC2 running a LAMP stack — Linux, Apache, MySQL, PHP. After application validation, a golden AMI would be created so the application server can be rebuilt consistently.</p>
         </div>
         <div class="phase-card">
-          <h4>Validated</h4>
+          <h4>Validation Plan</h4>
           <ul>
-            <li>LAMP stack deployed, Apache accessible</li>
-            <li>Menu items loading correctly</li>
-            <li>Order placed and confirmed persisted</li>
-            <li>AMI created from configured instance</li>
-            <li>Second instance from AMI in alternate region — identical</li>
+            <li>Confirm Apache and PHP application availability</li>
+            <li>Confirm menu workflow</li>
+            <li>Confirm database persistence</li>
+            <li>Create AMI from configured instance</li>
+            <li>Launch replacement instance from AMI and compare configuration</li>
           </ul>
         </div>
         <div class="phase-card">
           <h4>The Decision</h4>
-          <p>AMI before anything else. A manually configured server that only one person knows how to rebuild is a liability. An AMI is an asset. Every production environment should have a golden image before it serves a single real user.</p>
+          <p>AMI before repeat deployment. A manually configured server that only one person knows how to rebuild is a liability; a repeatable image gives the operations team a known recovery path.</p>
         </div>
       </div>
       <div class="insight-block fi">
@@ -856,17 +857,17 @@
           <p>Café Nimbus was going public with their platform. Their infrastructure had no meaningful network boundaries — everything was reachable from everywhere. Security had to be layered. A single misconfigured security group should not be enough to expose the entire backend.</p>
         </div>
         <div class="phase-card">
-          <h4>What I Built</h4>
-          <p>Custom VPC with /16 CIDR. Public subnet for ALB and bastion only. Private subnet for all application servers and the database — no public IPs, ever. NAT Gateway for outbound-only private traffic. Network ACLs as a stateless second layer of defence.</p>
+          <h4>Architecture Pattern</h4>
+          <p>Custom VPC with public and private subnet separation. Public subnets host internet-facing entry points such as ALB and bastion access; private subnets host application and database resources. NAT Gateway provides outbound-only internet access for private resources, and NACLs add a stateless subnet control layer.</p>
         </div>
         <div class="phase-card">
-          <h4>Validated</h4>
+          <h4>Validation Plan</h4>
           <ul>
-            <li>Private instances unreachable via direct connection</li>
-            <li>Bastion SSH confirmed as only entry path</li>
-            <li>NAT Gateway routing confirmed for private outbound</li>
-            <li>NACL deny rules blocked traffic as expected</li>
-            <li>Permitted traffic passed normally</li>
+            <li>Confirm private instances are not directly reachable from the internet</li>
+            <li>Confirm bastion or Session Manager access path</li>
+            <li>Confirm private subnet outbound routing through NAT Gateway</li>
+            <li>Test NACL deny behavior</li>
+            <li>Test expected allow behavior</li>
           </ul>
         </div>
         <div class="phase-card">
@@ -875,7 +876,7 @@
         </div>
       </div>
       <div class="insight-block fi">
-        <p><strong>The principle:</strong> No backend resource ever got a public IP. A single misconfigured security group without NACLs as a backstop is one mistake from a complete exposure.</p>
+        <p><strong>The principle:</strong> Backend resources should avoid direct public exposure. Security groups and NACLs together provide layered controls, but production still needs logging, monitoring, and access review.</p>
       </div>
     </div>
 
@@ -895,17 +896,17 @@
           <p>A single EC2 instance — no matter how well configured — is a single point of failure. When traffic spikes during a promotion, the site goes down. When the instance fails, the business goes dark. Neither is acceptable for a company preparing for national expansion.</p>
         </div>
         <div class="phase-card">
-          <h4>What I Built</h4>
-          <p>Application Load Balancer across two Availability Zones. Auto Scaling Group triggered by CPU utilization — not a schedule. Minimum instances maintained, scale-out on threshold breach, scale-in when load drops. Health checks replace failed instances automatically.</p>
+          <h4>Architecture Pattern</h4>
+          <p>Application Load Balancer across two Availability Zones with an Auto Scaling Group. CPU utilization is used as the example scaling trigger, with health checks and replacement behavior included in the design.</p>
         </div>
         <div class="phase-card">
-          <h4>Validated</h4>
+          <h4>Validation Plan</h4>
           <ul>
-            <li>ALB distributing traffic across both AZs</li>
-            <li>Load simulation triggered scale-out within 90 seconds</li>
-            <li>Instance manually terminated mid-test — no visible interruption</li>
-            <li>ASG replaced terminated instance automatically</li>
-            <li>Scale-in confirmed when load dropped</li>
+            <li>Confirm ALB target registration across both Availability Zones</li>
+            <li>Run controlled load test to trigger scale-out</li>
+            <li>Terminate one instance and confirm ASG replacement</li>
+            <li>Confirm replacement instance registration</li>
+            <li>Confirm scale-in behavior after load drops</li>
           </ul>
         </div>
         <div class="phase-card">
@@ -914,7 +915,7 @@
         </div>
       </div>
       <div class="insight-block fi">
-        <p><strong>The principle:</strong> Multi-AZ is not a luxury. A single-AZ deployment with ten instances is still a single point of failure. Two AZs with two instances each is genuinely resilient.</p>
+        <p><strong>The principle:</strong> Multi-AZ is not a luxury. A single-AZ deployment with ten instances is still a single point of failure. Two AZs with healthy targets reduce single-AZ dependency and create a stronger availability posture.</p>
       </div>
     </div>
 
@@ -931,20 +932,20 @@
       <div class="phase-grid fi">
         <div class="phase-card">
           <h4>The Problem</h4>
-          <p>Every morning, the operations team spent 45 minutes manually pulling the previous day's sales data and emailing it to management. Error-prone, time-consuming, and entirely unnecessary. The solution had to be serverless — running a cron job on EC2 means paying compute 24/7 for a 30-second task.</p>
+          <p>Every morning, the operations team scenario requires repeatable report generation. The design goal is to remove manual report preparation and avoid idle compute for a short scheduled task.</p>
         </div>
         <div class="phase-card">
-          <h4>What I Built</h4>
-          <p>Two Lambda functions: DataExtractor (queries RDS inside VPC) and SalesAnalysisReport (formats and delivers the report). SNS email topic for the operations distribution list. EventBridge rule fires at 8AM daily — no human involved, no idle compute.</p>
+          <h4>Architecture Pattern</h4>
+          <p>Two Lambda functions: DataExtractor for collecting data and SalesAnalysisReport for formatting the report. SNS delivers the report to a distribution list, and EventBridge triggers the workflow on a daily schedule.</p>
         </div>
         <div class="phase-card">
-          <h4>Validated</h4>
+          <h4>Validation Plan</h4>
           <ul>
-            <li>DataExtractor confirmed connecting to RDS within VPC</li>
-            <li>Sales data pulled and formatted correctly</li>
-            <li>SNS subscription confirmed active</li>
-            <li>Lambda manually triggered — email within 30 seconds</li>
-            <li>EventBridge scheduled execution confirmed</li>
+            <li>Confirm Lambda VPC access where required</li>
+            <li>Confirm report data extraction and formatting</li>
+            <li>Confirm SNS subscription delivery</li>
+            <li>Confirm manual Lambda test invocation</li>
+            <li>Confirm EventBridge scheduled invocation</li>
           </ul>
         </div>
         <div class="phase-card">
@@ -953,7 +954,7 @@
         </div>
       </div>
       <div class="insight-block fi">
-        <p><strong>The principle:</strong> The infrastructure does not need a human to survive a failure, handle a traffic spike, or send the morning report. That was the mandate. This is the result.</p>
+        <p><strong>The principle:</strong> The design reduces manual work by using managed services, health checks, Auto Scaling, and scheduled serverless execution. Implementation evidence would be needed before presenting this as a fully validated deployment.</p>
       </div>
     </div>
   </section>
@@ -1018,7 +1019,7 @@
 <section>
   <p class="label">What I'd Add in Production</p>
   <h2 class="section-title fi">No architecture <em>is finished.</em></h2>
-  <p class="section-body fi">These are the gaps I would close before calling this production-ready for a real business.</p>
+  <p class="section-body fi">These are the gaps I would close before treating this design as production-ready for a real business.</p>
   <div class="future-grid fi">
     <div class="future-card">
       <h4>AWS WAF on ALB</h4>
@@ -1051,16 +1052,16 @@
 <div class="band" id="result">
   <section>
     <p class="label">The Result</p>
-    <h2 class="section-title fi">Five layers.<br><em>Zero manual steps.</em></h2>
+    <h2 class="section-title fi">Five layers.<br><em>Clear tradeoffs.</em></h2>
     <ul class="result-list fi">
-      <li><div class="result-check">✓</div><div class="result-text"><strong>Serves static content globally</strong> from S3 with automatic regional failover — no server, no maintenance.</div></li>
-      <li><div class="result-check">✓</div><div class="result-text"><strong>Runs a dynamic application</strong> on compute that rebuilds itself from a golden image — reproducible by design.</div></li>
-      <li><div class="result-check">✓</div><div class="result-text"><strong>Isolates every backend resource</strong> behind a secure network boundary — no public IPs, no direct routes, two layers of control.</div></li>
-      <li><div class="result-check">✓</div><div class="result-text"><strong>Scales automatically</strong> in response to real traffic — not a schedule someone set and forgot.</div></li>
-      <li><div class="result-check">✓</div><div class="result-text"><strong>Reports on itself every morning at 8AM</strong> without a single manual step — Lambda, SNS, EventBridge, working while no one is watching.</div></li>
+      <li><div class="result-check">✓</div><div class="result-text"><strong>Documents static hosting</strong> using S3, versioning, lifecycle policy, and cross-region replication.</div></li>
+      <li><div class="result-check">✓</div><div class="result-text"><strong>Documents reproducible compute</strong> using EC2, LAMP, and AMI-based rebuild planning.</div></li>
+      <li><div class="result-check">✓</div><div class="result-text"><strong>Documents segmented networking</strong> using public/private subnets, bastion access, NAT Gateway, security groups, and NACLs.</div></li>
+      <li><div class="result-check">✓</div><div class="result-text"><strong>Documents scalable application design</strong> using ALB, Auto Scaling, and Multi-AZ placement.</div></li>
+      <li><div class="result-check">✓</div><div class="result-text"><strong>Documents reporting automation</strong> using Lambda, SNS, and EventBridge.</div></li>
     </ul>
     <div class="insight-block fi" style="margin-top:3rem;">
-      <p>The infrastructure does not need a human to survive a failure. It does not need a human to handle a traffic spike. And it does not need a human to send the morning sales report. <strong>That was the mandate. That is the result.</strong></p>
+      <p>The value of this case study is the architecture reasoning: what to build, why those services were chosen, what tradeoffs were rejected, and what production controls would still need to be added before a real go-live.</p>
     </div>
   </section>
 </div>
@@ -1069,24 +1070,24 @@
 <footer id="contact">
   <div>
     <h3 class="footer-name">Md Rahat<br>Islam Anik</h3>
-    <p class="footer-bio">Cloud & IT Infrastructure specialist based in Toronto, ON. AWS · Azure · Microsoft 365 · Power Automate. 6+ years of IT experience. 9 certifications. Open to the right role.</p>
+    <p class="footer-bio">Cloud & IT Infrastructure specialist based in Toronto, ON. AWS · Azure · Microsoft 365 · Power Automate. Portfolio focused on cloud infrastructure, automation, and IT operations.</p>
     <div class="btn-row">
-      <a class="btn-a" href="https://linkedin.com/in/rahatislamanik" target="_blank">LinkedIn ↗</a>
-      <a class="btn-b" href="https://github.com/rahatislamanik-spec" target="_blank">GitHub ↗</a>
+      <a class="btn-a" href="https://linkedin.com/in/rahatislamanik" target="_blank" rel="noopener noreferrer">LinkedIn ↗</a>
+      <a class="btn-b" href="https://github.com/rahatislamanik-spec" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
     </div>
   </div>
   <div>
     <p class="label" style="margin-bottom:1.5rem;">More Portfolio Projects</p>
     <div class="other-projects">
-      <a class="proj-link" href="https://rahatislamanik-spec.github.io/Project-Arabesque" target="_blank">
+      <a class="proj-link" href="https://rahatislamanik-spec.github.io/Project-Arabesque" target="_blank" rel="noopener noreferrer">
         <div><div class="proj-link-name">Project Arabesque</div><div class="proj-link-meta">M365 IT Automation · Canada's National Ballet School</div></div>
         <span class="proj-link-arrow">→</span>
       </a>
-      <a class="proj-link" href="https://rahatislamanik-spec.github.io/TechNova-Azure-Infrastructure" target="_blank">
+      <a class="proj-link" href="https://rahatislamanik-spec.github.io/TechNova-Azure-Infrastructure" target="_blank" rel="noopener noreferrer">
         <div><div class="proj-link-name">TechNova</div><div class="proj-link-meta">Azure Hub-and-Spoke Infrastructure · Case Study</div></div>
         <span class="proj-link-arrow">→</span>
       </a>
-      <a class="proj-link" href="https://github.com/rahatislamanik-spec" target="_blank">
+      <a class="proj-link" href="https://github.com/rahatislamanik-spec" target="_blank" rel="noopener noreferrer">
         <div><div class="proj-link-name">GitHub Portfolio</div><div class="proj-link-meta">github.com/rahatislamanik-spec</div></div>
         <span class="proj-link-arrow">→</span>
       </a>
