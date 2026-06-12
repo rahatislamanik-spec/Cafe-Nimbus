@@ -1,4 +1,5 @@
 # Café Nimbus — AWS Infrastructure Architecture Case Study
+> **Status:** Evidence Update Pending
 
 ### Five-Phase AWS Architecture · Availability, Segmentation, Automation, and Production Readiness
 
